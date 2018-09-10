@@ -23,6 +23,7 @@ namespace NotesApp.View
 		  public LoginWindow()
 		  {
 			   InitializeComponent();
+			   DataContext = new LoginVM(this);
 		  }
 
 	 }

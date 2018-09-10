@@ -7,15 +7,20 @@
         xmlns:vm="clr-namespace:NotesApp.ViewModel"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="LoginWindow" Height="300" Width="300">
+        Title="Login" Height="300" Width="300">
 
      <Window.Resources>
           <vm:LoginVM x:Key="login" />
      </Window.Resources>
-     
-     <Grid x:Name="containerGrid">
-          <StackPanel x:Name="loginStackPanel" Margin="20 0"
+
+     <Grid>
+          <StackPanel Margin="20 0"
                       VerticalAlignment="Center">
+               <TextBlock FontSize="20"
+                          Text="Notes App"
+                          HorizontalAlignment="Center"
+                          Margin="0 0 0 30"/>
+               
                <TextBlock Text="Username:" />
                <TextBox Text="{Binding User.Username, Mode=TwoWay}"/>
                <TextBlock Text="Password:" />
@@ -24,16 +29,7 @@
 
                <Button x:Name="button" Margin="0 5 0 0"
                        Command="{Binding LoginCommand}"
-                       CommandParameter="{Binding User}"
-                       Content="Login" RenderTransformOrigin="0.5,0.5" Width="250" Height="25" >
-                    <Button.RenderTransform>
-                         <TransformGroup>
-                              <ScaleTransform/>
-                              <SkewTransform/>
-                              <RotateTransform/>
-                              <TranslateTransform/>
-                         </TransformGroup>
-                    </Button.RenderTransform>
+                       Content="Login" Width="Auto" Height="25" >
                </Button>
 
                <Button x:Name="noAccountButton"
@@ -41,9 +37,8 @@
                        Content="I don't have an account"
                        HorizontalAlignment="Right"
                         />
-
-
           </StackPanel>
+          
           <StackPanel x:Name="registerStackPanel" Margin="20 0"
                       VerticalAlignment="Center"
                       Visibility="Collapsed">

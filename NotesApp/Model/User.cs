@@ -11,13 +11,20 @@ namespace NotesApp.Model
 	 public class User : INotifyPropertyChanged
 	 {
 		  
-		  private string _Id;
+		  private int _Id;
 
 		  [PrimaryKey, AutoIncrement]
-		  public string Id
+		  public int Id
 		  {
 			   get { return _Id; }
-			   set { _Id = value; OnPropertyChanged(nameof(Id)); }
+			   set
+			   {
+					if (_Id == value)
+						 return;
+
+					_Id = value;
+					OnPropertyChanged(nameof(Id));
+			   }
 		  }
 
 		  private string _Name;
@@ -26,7 +33,13 @@ namespace NotesApp.Model
 		  public string Name
 		  {
 			   get { return _Name; }
-			   set { _Name = value; OnPropertyChanged(nameof(Name)); }
+			   set
+			   {
+					if (_Name == value)
+						 return;
+					_Name = value;
+					OnPropertyChanged(nameof(Name));
+			   }
 		  }
 
 		  private string _Lastname;
