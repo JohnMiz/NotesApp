@@ -17,35 +17,22 @@ namespace NotesApp.Model
 
 		  public bool VerifyCredentials()
 		  {
-			   if (string.IsNullOrEmpty(_User.Username) || string.IsNullOrEmpty(_User.Password))
-			   {
-					return false;
-			   }
-
-			   return true;
+			   return !(string.IsNullOrEmpty(_User.Username) || string.IsNullOrEmpty(_User.Password));
 		  }
 
+		  // TODO: Separate each check and give the user proper message
 		  public bool VerifyRegisterInfo()
 		  {
-			   if (string.IsNullOrEmpty(_User.Username) ||
+			   return !(string.IsNullOrEmpty(_User.Username) ||
 					string.IsNullOrEmpty(_User.Password) ||
 					string.IsNullOrEmpty(_User.Email) ||
 					string.IsNullOrEmpty(_User.Lastname) ||
-					string.IsNullOrEmpty(_User.Name))
-			   {
-					return false;
-			   }
-
-			   return true;
+					string.IsNullOrEmpty(_User.Name));
 		  }
 
 		  public bool VerifyPassword(string password)
 		  {
-			   if (_User.Password == password)
-			   {
-					return true;
-			   }
-			   return false;
+			   return (_User.Password == password);
 		  }
 	 }
 }

@@ -24,7 +24,7 @@ namespace NotesApp.View
 		  public LoginWindow()
 		  {
 			   InitializeComponent();
-			   DataContext = new LoginVM(this, new SqliteLoginService());
+			   DataContext = new LoginVM(this, new SqliteLoginService()); // TODO: Inject SqliteLoginService
 		  }
 
 	 }
