@@ -1,4 +1,5 @@
-﻿using NotesApp.ViewModel;
+﻿using NotesApp.Services;
+using NotesApp.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace NotesApp.View
 		  public LoginWindow()
 		  {
 			   InitializeComponent();
-			   DataContext = new LoginVM(this);
+			   DataContext = new LoginVM(this, new SqliteLoginService());
 		  }
 
 	 }

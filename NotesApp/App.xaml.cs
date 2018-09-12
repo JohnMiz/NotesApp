@@ -16,7 +16,7 @@ namespace NotesApp
 	 public partial class App : Application
 	 {
 
-		  public static string UserId = string.Empty;
+		  public static int UserId;
 		  public static MobileServiceClient MobileServiceClient = new MobileServiceClient("https://notesappwpf.azurewebsites.net");
 
 		  protected override void OnStartup(StartupEventArgs e)

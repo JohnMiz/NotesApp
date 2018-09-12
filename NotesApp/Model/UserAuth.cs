@@ -38,5 +38,14 @@ namespace NotesApp.Model
 
 			   return true;
 		  }
+
+		  public bool VerifyPassword(string password)
+		  {
+			   if (_User.Password == password)
+			   {
+					return true;
+			   }
+			   return false;
+		  }
 	 }
 }

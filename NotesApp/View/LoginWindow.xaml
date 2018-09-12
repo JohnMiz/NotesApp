@@ -5,17 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NotesApp.View"
         xmlns:vm="clr-namespace:NotesApp.ViewModel"
+        xmlns:con="clr-namespace:NotesApp.ViewModel.Converters"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="Login" Height="300" Width="300">
+        Title="Login" Height="400" Width="400">
 
      <Window.Resources>
-          <vm:LoginVM x:Key="login" />
+          <con:BoolToVisConverter x:Key="BoolToVisConverter" />
+          <con:InverseBoolToVisConverter x:Key="InverseBoolToVisConverter" />
      </Window.Resources>
 
      <Grid>
           <StackPanel Margin="20 0"
-                      VerticalAlignment="Center">
+                      VerticalAlignment="Center"
+                      Visibility="{Binding IsLoginMode, Converter={StaticResource BoolToVisConverter }}">
                <TextBlock FontSize="20"
                           Text="Notes App"
                           HorizontalAlignment="Center"
@@ -35,13 +38,14 @@
                <Button x:Name="noAccountButton"
                        Margin="0 5 0 0"
                        Content="I don't have an account"
+                       Command="{Binding NoAccountCommand}"
                        HorizontalAlignment="Right"
                         />
           </StackPanel>
           
           <StackPanel x:Name="registerStackPanel" Margin="20 0"
                       VerticalAlignment="Center"
-                      Visibility="Collapsed">
+                      Visibility="{Binding IsLoginMode, Converter={con:InverseBoolToVisConverter}}">
                <TextBlock Text="Username:" />
                <TextBox Text="{Binding User.Username, Mode=TwoWay}"/>
                <TextBlock Text="Name:" />
@@ -62,8 +66,8 @@
                        CommandParameter="{Binding User}"
                        Content="Register" />
 
-               <Button x:Name="haveAccountButton"
-                       Content="I have an account"
+               <Button Content="I have an account"
+                       Command="{Binding HaveAccountCommand}"
                        HorizontalAlignment="Right" 
                        Margin="0 5 0 0"
                        />

@@ -1,4 +1,5 @@
 ﻿using NotesApp.Model;
+using NotesApp.Services;
 using NotesApp.View;
 using NotesApp.ViewModel.Commands;
 using System;
@@ -40,7 +41,9 @@ namespace NotesApp.ViewModel
 		  public ICommand NoAccountCommand { get; set; }
 		  public ICommand HaveAccountCommand { get; set; }
 
-		  public LoginVM(Window window)
+		  private ILoginService _LoginService;
+
+		  public LoginVM(Window window, ILoginService loginService)
 		  {
 			   _Window = window;
 
@@ -49,12 +52,12 @@ namespace NotesApp.ViewModel
 			   NoAccountCommand = new RelayCommand(NoAccount);
 			   HaveAccountCommand = new RelayCommand(HaveAccount);
 
+			   _LoginService = loginService;
+
 			   User = new User();
 			   _UserAuth = new UserAuth(User);
 			   IsLoginMode = true;
 		  }
-
-
 
 		  #region Command Functions
 
@@ -63,18 +66,18 @@ namespace NotesApp.ViewModel
 			   string message = string.Empty;
 			   if (_UserAuth.VerifyCredentials())
 			   {
-					User user = GetUserFromDB(User.Username);
+					User user = _LoginService.GetUserFromDB(User.Username);
 
 					// TODO: Add loading that will notify the user that the server is processing the data
 
 					if (user != null)
 					{
-						 if (VerifyPassword(user))
+						 if (_UserAuth.VerifyPassword(user.Password))
 						 {
 							  App.UserId = User.Id;
 
 							  GoToNotesWindow();
-
+						   
 							  _Window.Close();
 						 }
 						 else
@@ -93,7 +96,8 @@ namespace NotesApp.ViewModel
 					message = "Enter username and password please!";
 			   }
 
-			   MessageBox.Show(message);
+			   if(!string.IsNullOrEmpty(message))
+					MessageBox.Show(message);
 		  }
 
 		  private void Register()
@@ -121,37 +125,6 @@ namespace NotesApp.ViewModel
 		  }
 
 		  #endregion
-
-		  private User GetUserFromDB(string username)
-		  {
-			   using (SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(DatabaseHelper.dbFile))
-			   {
-					conn.CreateTable<User>();
-
-					var dbUser = conn.Table<User>().Where(u => u.Username == User.Username).FirstOrDefault();
-
-					// TODO: Add loading that will notify the user that the server is processing the data
-
-					if (dbUser != null)
-					{
-						 if (username == dbUser.Username)
-							  return dbUser;
-					}
-
-			   }
-
-			   return null;
-		  }
-
-
-		  bool VerifyPassword(User user)
-		  {
-			   if (user.Password == User.Password)
-			   {
-					return true;
-			   }
-			   return false;
-		  }
 
 		  private void GoToNotesWindow()
 		  {
