@@ -10,15 +10,15 @@ using System.Windows.Markup;
 
 namespace NotesApp.ViewModel.Converters
 {
-	 public class BoolToVisConverter : MarkupExtension, IValueConverter
+	 public class InverseBoolToVisConverter : MarkupExtension, IValueConverter
 	 {
 		  public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		  {
 			   bool IsVisible = (bool)value;
 
 			   if (IsVisible)
-					return Visibility.Visible;
-			   else return Visibility.Collapsed;
+					return Visibility.Collapsed;
+			   else return Visibility.Visible;
 		  }
 
 		  public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

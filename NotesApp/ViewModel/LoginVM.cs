@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace NotesApp.ViewModel
 {
-	 public class LoginVM
+	 public class LoginVM : ObservablePropertyNotifier
 	 {
 		  private User _User;
 
@@ -22,62 +22,135 @@ namespace NotesApp.ViewModel
 			   set { _User = value; }
 		  }
 
+		  public UserAuth _UserAuth { get; set; }
+
+		  private bool _IsLoginMode;
+
+		  public bool IsLoginMode
+		  {
+			   get { return _IsLoginMode; }
+			   set { if (_IsLoginMode == value) return; _IsLoginMode = value; OnPropertyChanged(nameof(IsLoginMode)); }
+		  }
+
+
 		  private Window _Window { get; set; }
 
 		  public ICommand LoginCommand { get; set; }
+		  public ICommand RegisterCommand { get; set; }
+		  public ICommand NoAccountCommand { get; set; }
+		  public ICommand HaveAccountCommand { get; set; }
 
 		  public LoginVM(Window window)
 		  {
 			   _Window = window;
+
 			   LoginCommand = new RelayCommand(Login);
+			   RegisterCommand = new RelayCommand(Register);
+			   NoAccountCommand = new RelayCommand(NoAccount);
+			   HaveAccountCommand = new RelayCommand(HaveAccount);
+
 			   User = new User();
+			   _UserAuth = new UserAuth(User);
+			   IsLoginMode = true;
 		  }
 
-		  private bool ValidateUser(User user)
-		  {
-			   if(string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Username))
-			   {
-					return false;
-			   }
 
-			   // TODO: Check if the username already exists in the db
 
-			   return true;
-		  }
+		  #region Command Functions
 
 		  private void Login()
 		  {
-			   if(ValidateUser(User))
+			   string message = string.Empty;
+			   if (_UserAuth.VerifyCredentials())
 			   {
-					using (SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(DatabaseHelper.dbFile))
+					User user = GetUserFromDB(User.Username);
+
+					// TODO: Add loading that will notify the user that the server is processing the data
+
+					if (user != null)
 					{
-						 conn.CreateTable<User>();
-
-						 var user = conn.Table<User>().Where(u => u.Username == User.Username).FirstOrDefault();
-
-						 if(user != null)
+						 if (VerifyPassword(user))
 						 {
-							  if(user.Password == User.Password)
-							  {
-								   GoToNotesWindow();
+							  App.UserId = User.Id;
 
-								    _Window.Close();
-							  }
-							  else
-							  {
-								   MessageBox.Show("Username or password not found!");
-							  }
+							  GoToNotesWindow();
+
+							  _Window.Close();
 						 }
 						 else
 						 {
-							  MessageBox.Show("Username or password not found!");
+							  message = "Username or password not found!";
 						 }
 					}
+					else
+					{
+						 message = "Username or password not found!";
+					}
+
 			   }
 			   else
 			   {
-					MessageBox.Show("Enter username and password please!");
+					message = "Enter username and password please!";
 			   }
+
+			   MessageBox.Show(message);
+		  }
+
+		  private void Register()
+		  {
+			   if(_UserAuth.VerifyRegisterInfo())
+			   {
+					var result = DatabaseHelper.Insert(User);
+
+					if(result)
+					{
+						 App.UserId = User.Id;
+						 IsLoginMode = true;
+					}
+			   }
+		  }
+
+		  private void NoAccount()
+		  {
+			   IsLoginMode = false;
+		  }
+
+		  private void HaveAccount()
+		  {
+			   IsLoginMode = true;
+		  }
+
+		  #endregion
+
+		  private User GetUserFromDB(string username)
+		  {
+			   using (SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(DatabaseHelper.dbFile))
+			   {
+					conn.CreateTable<User>();
+
+					var dbUser = conn.Table<User>().Where(u => u.Username == User.Username).FirstOrDefault();
+
+					// TODO: Add loading that will notify the user that the server is processing the data
+
+					if (dbUser != null)
+					{
+						 if (username == dbUser.Username)
+							  return dbUser;
+					}
+
+			   }
+
+			   return null;
+		  }
+
+
+		  bool VerifyPassword(User user)
+		  {
+			   if (user.Password == User.Password)
+			   {
+					return true;
+			   }
+			   return false;
 		  }
 
 		  private void GoToNotesWindow()
