@@ -16,6 +16,10 @@
           <vm:NotesVM x:Key="vm" />
           <con:BoolToVisConverter  x:Key="BoolToVisConverter"/>
      </Window.Resources>
+
+     <Window.DataContext>
+          <vm:NotesVM />
+     </Window.DataContext>
      
      <DockPanel x:Name="container">
           <Menu DockPanel.Dock="Top">
@@ -39,14 +43,14 @@
                <ListView.ItemTemplate>
                     <DataTemplate>
                          <Grid>
-                              <!--<uc:Notebook DisplayNotebook="{Binding}"/>-->
+                              <uc:Notebook />
                               <TextBox Text="{Binding Name, Mode=TwoWay}"
-                                       Visibility="{Binding IsEditing, Source={StaticResource vm}, Converter={StaticResource BoolToVisConverter}}"
+                                       Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisConverter}}"
                                        >
                                    <b:Interaction.Triggers>
                                         <b:EventTrigger EventName="LostFocus">
                                              <b:InvokeCommandAction 
-                                                  Command="{Binding HasEditedCommand, Source={StaticResource vm}}"
+                                                  Command="{Binding EndEditCommand, Source={StaticResource vm}}"
                                                   CommandParameter="{Binding}"
                                                   />
                                         </b:EventTrigger>
@@ -55,7 +59,8 @@
                               <Grid.ContextMenu>
                                    <ContextMenu>
                                         <MenuItem Header="Rename"
-                                                  Command="{Binding BeginEditCommand, Source={StaticResource vm}}"/>
+                                                  Command="{Binding BeginEditCommand, Source={StaticResource vm}}"
+                                                  CommandParameter="{Binding}"/>
                                         <MenuItem Header="Delete"
                                                   Command="{Binding DeleteNotebookCommand, Source={StaticResource vm}}"
                                                   CommandParameter="{Binding SelectedNotebook, Source={StaticResource vm}}"/>

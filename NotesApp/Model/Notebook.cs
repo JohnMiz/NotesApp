@@ -10,19 +10,19 @@ namespace NotesApp.Model
 {
 	 public class Notebook : INotifyPropertyChanged
 	 {
-		  private string _Id;
+		  private int _Id;
 
 		  [PrimaryKey, AutoIncrement]
-		  public string Id
+		  public int Id
 		  {
 			   get { return _Id; }
 			   set { _Id = value; OnPropertyChanged(nameof(Id)); }
 		  }
 
-		  private string _UserId;
+		  private int _UserId;
 
 		  [Indexed]
-		  public string UserId
+		  public int UserId
 		  {
 			   get { return _UserId; }
 			   set { _UserId = value; OnPropertyChanged(nameof(UserId)); }
@@ -35,6 +35,14 @@ namespace NotesApp.Model
 			   get { return _Name; }
 			   set { _Name = value; OnPropertyChanged(nameof(Name)); }
 
+		  }
+
+		  private bool _IsEditing = false;
+
+		  public bool IsEditing
+		  {
+			   get { return _IsEditing; }
+			   set { if (_IsEditing == value) return; _IsEditing = value; OnPropertyChanged(nameof(IsEditing)); }
 		  }
 
 		  public event PropertyChangedEventHandler PropertyChanged;

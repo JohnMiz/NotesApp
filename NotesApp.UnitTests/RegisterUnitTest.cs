@@ -26,5 +26,20 @@ namespace NotesApp.UnitTests
 			   // Assert
 			   Assert.IsTrue(result);
 		  }
+
+		  [TestMethod]
+		  public void VerifyRegisterInfo_NotAllFieldAreFilled_ReturnsFalse()
+		  {
+			   // Arrange
+			   var user = new User { Username = "test", Password = "test", Email = "test", Lastname = "test"};
+			   var userAuth = new UserAuth(user);
+
+			   // Act
+
+			   var result = userAuth.VerifyRegisterInfo();
+
+			   // Assert
+			   Assert.IsFalse(result);
+		  }
 	 }
 }

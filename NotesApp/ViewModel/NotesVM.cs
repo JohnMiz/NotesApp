@@ -11,18 +11,89 @@ using System.Windows.Input;
 
 namespace NotesApp.ViewModel
 {
-	 public class NotesVM
+	 public class NotesVM : ObservablePropertyNotifier
 	 {
+		  public ObservableCollection<Notebook> Notebooks { get; set; }
+
+		  private Notebook _SelectedNotebook;
+
+		  public Notebook SelectedNotebook
+		  {
+			   get { return _SelectedNotebook; }
+			   set
+			   {
+					if (_SelectedNotebook == value)
+						 return;
+
+					_SelectedNotebook = value;
+
+					OnPropertyChanged(nameof(SelectedNotebook));
+			   }
+		  }
+
+
 		  public ICommand NewNotebookCommand { get; set; }
+		  public ICommand BeginEditCommand { get; set; }
+		  public ICommand EndEditCommand { get; set; }
+
 
 		  public NotesVM()
 		  {
+			   Notebooks = new ObservableCollection<Notebook>();
+
 			   NewNotebookCommand = new RelayCommand(NewNotebook);
+			   BeginEditCommand = new RelayParameterizedCommand<Notebook>(BeginEdit);
+			   EndEditCommand = new RelayParameterizedCommand<Notebook>(EndEdit);
+
+			   ReadNotebooks();
+
+		  }
+
+		  private void EndEdit(Notebook notebook)
+		  {
+			   if(notebook != null)
+			   {
+					notebook.IsEditing = false;
+					DatabaseHelper.Update(notebook);
+			   }
+		  }
+
+		  private void BeginEdit(Notebook notebook)
+		  {
+			   notebook.IsEditing = true;
 		  }
 
 		  private void NewNotebook()
 		  {
-			   throw new NotImplementedException();
+			   DatabaseHelper.Insert(CreateNewNotebook());
+
+			   Notebooks.Clear();
+
+			   ReadNotebooks();
+		  }
+
+		  private void ReadNotebooks()
+		  {
+			   using (SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(DatabaseHelper.dbFile))
+			   {
+					var notebooks = conn.Table<Notebook>().ToList();
+
+					foreach(var notebook in notebooks)
+					{
+						 Notebooks.Add(notebook);
+					}
+			   }
+		  }
+
+		  Notebook CreateNewNotebook()
+		  {
+			   Notebook notebook = new Notebook
+			   {
+					UserId = App.UserId,
+					Name = "New Notebook"
+			   };
+
+			   return notebook;
 		  }
 	 }
 }
