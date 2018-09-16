@@ -11,18 +11,18 @@ namespace NotesApp.Model
 	 public class Note : INotifyPropertyChanged
 	 {
 
-		  private string _Id;
+		  private int _Id;
 
 		  [PrimaryKey, AutoIncrement]
-		  public string Id
+		  public int Id
 		  {
 			   get { return _Id; }
 			   set { _Id = value; OnPropertyChanged(nameof(Id)); }
 		  }
 
-		  private string _NotebookId;
+		  private int _NotebookId;
 		  [Indexed]
-		  public string NotebookId
+		  public int NotebookId
 		  {
 			   get { return _NotebookId; }
 			   set { _NotebookId = value; OnPropertyChanged(nameof(NotebookId)); }
@@ -58,6 +58,14 @@ namespace NotesApp.Model
 		  {
 			   get { return _FileLocation; }
 			   set { _FileLocation = value; OnPropertyChanged(nameof(FileLocation)); }
+		  }
+
+		  private bool _IsEditing = false;
+
+		  public bool IsEditing
+		  {
+			   get { return _IsEditing; }
+			   set { if (_IsEditing == value) return; _IsEditing = value; OnPropertyChanged(nameof(IsEditing)); }
 		  }
 
 		  public event PropertyChangedEventHandler PropertyChanged;

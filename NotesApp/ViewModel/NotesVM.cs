@@ -28,14 +28,34 @@ namespace NotesApp.ViewModel
 						 return;
 
 					_SelectedNotebook = value;
+					ReadNotes();
 
 					OnPropertyChanged(nameof(SelectedNotebook));
 			   }
 		  }
-		  
+
+		  private Note _SelectedNote;
+
+		  public Note SelectedNote
+		  {
+			   get { return _SelectedNote; }
+			   set
+			   {
+					if (_SelectedNote == value)
+						 return;
+
+					_SelectedNote = value;
+
+					OnPropertyChanged(nameof(SelectedNote));
+			   }
+		  }
+
+
 		  public ICommand NewNotebookCommand { get; set; }
-		  public ICommand BeginEditCommand { get; set; }
-		  public ICommand EndEditCommand { get; set; }
+		  public ICommand NotebookBeginEditCommand { get; set; }
+		  public ICommand NotebookEndEditCommand { get; set; }
+		  public ICommand NoteBeginEditCommand { get; set; }
+		  public ICommand NoteEndEditCommand { get; set; }
 
 		  public ICommand NewNoteCommand { get; set; }
 
@@ -43,23 +63,76 @@ namespace NotesApp.ViewModel
 		  public NotesVM()
 		  {
 			   Notebooks = new ObservableCollection<Notebook>();
+			   Notes = new ObservableCollection<Note>();
 
 			   NewNotebookCommand = new RelayCommand(NewNotebook);
-			   BeginEditCommand = new RelayParameterizedCommand<Notebook>(BeginEdit);
-			   EndEditCommand = new RelayParameterizedCommand<Notebook>(EndEdit);
+			   NotebookBeginEditCommand = new RelayParameterizedCommand<Notebook>(NotebookBeginEdit);
+			   NotebookEndEditCommand = new RelayParameterizedCommand<Notebook>(NotebookEndEdit);
+			   NoteBeginEditCommand = new RelayParameterizedCommand<Note>(NoteBeginEdit);
+			   NoteEndEditCommand = new RelayParameterizedCommand<Note>(NoteEndEdit);
 
 			   NewNoteCommand = new RelayParameterizedCommand<Notebook>(NewNote);
 
 			   ReadNotebooks();
+			   ReadNotes();
 
+		  }
+
+		  private void NoteEndEdit(Note note)
+		  {
+			   if(note != null)
+			   {
+					note.IsEditing = false;
+					DatabaseHelper.Update(note);
+			   }
+		  }
+
+		  private void NoteBeginEdit(Note note)
+		  {
+			   if(note != null)
+			   {
+					note.IsEditing = true;
+			   }
+					
+		  }
+
+		  private void ReadNotes()
+		  {
+			   using (SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(DatabaseHelper.dbFile))
+			   {
+					conn.CreateTable<Note>();
+
+					if (SelectedNotebook != null)
+					{
+						 Notes.Clear();
+
+						 var notes = conn.Table<Note>().Where(n => n.NotebookId == SelectedNotebook.Id).ToList();
+
+						 foreach (var note in notes)
+						 {
+							  Notes.Add(note);
+						 }
+					}
+			   }
 		  }
 
 		  private void NewNote(Notebook notebook)
 		  {
+			   Note newNote = new Note
+			   {
+					NotebookId = notebook.Id,
+					CreatedTime = DateTime.Now,
+					UpdatedTime = DateTime.Now,
+					Title = "New Note",
 
+			   };
+
+			   DatabaseHelper.Insert(newNote);
+
+			   ReadNotes();
 		  }
 
-		  private void EndEdit(Notebook notebook)
+		  private void NotebookEndEdit(Notebook notebook)
 		  {
 			   if(notebook != null)
 			   {
@@ -68,7 +141,7 @@ namespace NotesApp.ViewModel
 			   }
 		  }
 
-		  private void BeginEdit(Notebook notebook)
+		  private void NotebookBeginEdit(Notebook notebook)
 		  {
 			   notebook.IsEditing = true;
 		  }
