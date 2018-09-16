@@ -15,6 +15,8 @@ namespace NotesApp.ViewModel
 	 {
 		  public ObservableCollection<Notebook> Notebooks { get; set; }
 
+		  public ObservableCollection<Note> Notes { get; set; }
+
 		  private Notebook _SelectedNotebook;
 
 		  public Notebook SelectedNotebook
@@ -30,11 +32,12 @@ namespace NotesApp.ViewModel
 					OnPropertyChanged(nameof(SelectedNotebook));
 			   }
 		  }
-
-
+		  
 		  public ICommand NewNotebookCommand { get; set; }
 		  public ICommand BeginEditCommand { get; set; }
 		  public ICommand EndEditCommand { get; set; }
+
+		  public ICommand NewNoteCommand { get; set; }
 
 
 		  public NotesVM()
@@ -45,7 +48,14 @@ namespace NotesApp.ViewModel
 			   BeginEditCommand = new RelayParameterizedCommand<Notebook>(BeginEdit);
 			   EndEditCommand = new RelayParameterizedCommand<Notebook>(EndEdit);
 
+			   NewNoteCommand = new RelayParameterizedCommand<Notebook>(NewNote);
+
 			   ReadNotebooks();
+
+		  }
+
+		  private void NewNote(Notebook notebook)
+		  {
 
 		  }
 
@@ -80,7 +90,10 @@ namespace NotesApp.ViewModel
 
 					foreach(var notebook in notebooks)
 					{
-						 Notebooks.Add(notebook);
+						 if (notebook.UserId == App.UserId)
+						 {
+							  Notebooks.Add(notebook);
+						 }
 					}
 			   }
 		  }

@@ -74,7 +74,7 @@ namespace NotesApp.ViewModel
 					{
 						 if (_UserAuth.VerifyPassword(user.Password))
 						 {
-							  App.UserId = User.Id;
+							  App.UserId = user.Id;
 
 							  GoToNotesWindow();
 						   
