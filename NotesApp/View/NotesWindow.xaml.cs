@@ -29,5 +29,12 @@ namespace NotesApp.View
 		  {
 			   InitializeComponent();
 		  }
+
+		  private void RichTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		  {
+			   var TextRange = new TextRange(contentRichTextBox.Document.ContentStart, contentRichTextBox.Document.ContentEnd);
+
+			   statusTextBlock.Text = $"Document length: {TextRange.Text.Length - 2} characters";
+		  }
 	 }
 }

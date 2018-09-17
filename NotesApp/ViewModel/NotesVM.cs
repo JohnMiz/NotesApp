@@ -50,6 +50,21 @@ namespace NotesApp.ViewModel
 			   }
 		  }
 
+		  private string _NoteContent;
+
+		  public string NoteContent
+		  {
+			   get { return _NoteContent; }
+			   set {
+					if (_NoteContent == value)
+						 return;
+
+					_NoteContent = value;
+					OnPropertyChanged(nameof(NoteContent));
+
+			   }
+		  }
+
 
 		  public ICommand NewNotebookCommand { get; set; }
 		  public ICommand NotebookBeginEditCommand { get; set; }
@@ -58,6 +73,7 @@ namespace NotesApp.ViewModel
 		  public ICommand NoteEndEditCommand { get; set; }
 
 		  public ICommand NewNoteCommand { get; set; }
+		  public ICommand TextChangedCommand { get; set; }
 
 
 		  public NotesVM()
@@ -73,9 +89,16 @@ namespace NotesApp.ViewModel
 
 			   NewNoteCommand = new RelayParameterizedCommand<Notebook>(NewNote);
 
+			   TextChangedCommand = new RelayCommand(RichTextChanged);
+
 			   ReadNotebooks();
 			   ReadNotes();
 
+		  }
+
+		  private void RichTextChanged()
+		  {
+			   
 		  }
 
 		  private void NoteEndEdit(Note note)
