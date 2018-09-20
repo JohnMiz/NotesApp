@@ -21,7 +21,7 @@
      <Window.DataContext>
           <vm:NotesVM />
      </Window.DataContext>
-     
+
      <DockPanel x:Name="container">
           <Menu DockPanel.Dock="Top">
                <MenuItem Header="File">
@@ -33,10 +33,10 @@
           </Menu>
           <StatusBar DockPanel.Dock="Bottom">
                <StatusBarItem>
-                    <TextBlock x:Name="statusTextBlock" />
+                    <TextBlock Text="{Binding ContentLength}"  />
                </StatusBarItem>
           </StatusBar>
-          
+
           <!-- Notebooks -->
           <ListView Width="140" DockPanel.Dock="Left"
                     ItemsSource="{Binding Notebooks}"
@@ -72,7 +72,7 @@
                     </DataTemplate>
                </ListView.ItemTemplate>
           </ListView>
-          
+
           <!-- Notes -->
           <ListView Width="140" DockPanel.Dock="Left"
                     ItemsSource="{Binding Notes}"
@@ -100,28 +100,33 @@
                                    </ContextMenu>
                               </Grid.ContextMenu>
                          </Grid>
-                         
+
                     </DataTemplate>
                </ListView.ItemTemplate>
           </ListView>
           <ToolBarTray DockPanel.Dock="Top">
                <ToolBar>
-                    <ToggleButton Content="Speech" Name="speechButton" />
-                    <ToggleButton Name="boldButton">
+                    <ToggleButton Content="Speech" Name="speechButton"
+                                  Command="{Binding SpeechCommand, Source={StaticResource vm}}"
+                                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"/>
+                    <ToggleButton Name="boldButton" Click="boldButton_Click">
                          <TextBlock Text="B" FontWeight="Bold" />
                     </ToggleButton>
-                    <ToggleButton Name="italicButton" >
+                    <ToggleButton Name="italicButton" Click="italicButton_Click">
                          <TextBlock Text="I" FontStyle="Italic" />
                     </ToggleButton>
-                    <ToggleButton Name="underlineButton" >
-                         <TextBlock Text="U" TextDecorations="Underline" />
+                    <ToggleButton Name="underlineButton" Click="underlineButton_Click">
+                         <TextBlock Text="U" TextDecorations="Underline" 
+                                    />
                     </ToggleButton>
                     <ComboBox Name="fontFamilyComboBox"
                               Width="100"
+                              SelectionChanged="fontFamilyComboBox_SelectionChanged"
                               />
-                    <ComboBox Name="FontSizeComboBox"
+                    <ComboBox Name="fontSizeComboBox"
                               Width="50"
                               IsEditable="true"
+                              SelectionChanged="FontSizeComboBox_SelectionChanged"
                               />
                     <Button Content="Save"
                             x:Name="saveFile"
@@ -129,18 +134,16 @@
                </ToolBar>
           </ToolBarTray>
           <Grid>
+               <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="29*"/>
+                    <ColumnDefinition Width="333*"/>
+               </Grid.ColumnDefinitions>
                <toolkit:RichTextBox 
-                    Text="{Binding NoteContent, Mode=TwoWay,Source={StaticResource vm}}"
-                    TextChanged="RichTextBox_TextChanged"
-                    Name="contentRichTextBox">
-                    <!--<b:Interaction.Triggers>
-                         <b:EventTrigger EventName="TextChanged">
-                              <b:InvokeCommandAction Command="{Binding TextChangedCommand, Source={StaticResource vm}}"
-                                                     CommandParameter="{}"/>
-                         </b:EventTrigger>
-                    </b:Interaction.Triggers>-->
-                   
-                    
+                    Text="{Binding NoteContent, Source={StaticResource vm}, UpdateSourceTrigger=PropertyChanged}"
+                    Name="contentRichTextBox" Grid.ColumnSpan="2"
+                    SelectionChanged="contentRichTextBox_SelectionChanged">
+
+
                </toolkit:RichTextBox>
           </Grid>
      </DockPanel>

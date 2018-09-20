@@ -17,7 +17,7 @@ namespace NotesApp
 	 {
 
 		  public static int UserId;
-		  public static MobileServiceClient MobileServiceClient = new MobileServiceClient("https://notesappwpf.azurewebsites.net");
+		  //public static MobileServiceClient MobileServiceClient = new MobileServiceClient("YOUR AZURE SERVER HERE");
 
 		  protected override void OnStartup(StartupEventArgs e)
 		  {

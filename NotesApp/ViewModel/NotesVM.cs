@@ -4,13 +4,40 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Speech.Recognition;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace NotesApp.ViewModel
 {
+	 public class ContentLength : ObservablePropertyNotifier
+	 {
+		  private int _Length;
+
+		  public int Length
+		  {
+			   get { return _Length; }
+			   set
+			   {
+
+					if (_Length == value)
+						 return;
+
+					_Length = value;
+					OnPropertyChanged(nameof(Length));
+			   }
+		  }
+
+		  public override string ToString()
+		  {
+			   return $"Document length: {Length - 2} characters";
+		  }
+	 }
+
 	 public class NotesVM : ObservablePropertyNotifier
 	 {
 		  public ObservableCollection<Notebook> Notebooks { get; set; }
@@ -55,15 +82,45 @@ namespace NotesApp.ViewModel
 		  public string NoteContent
 		  {
 			   get { return _NoteContent; }
-			   set {
+			   set
+			   {
 					if (_NoteContent == value)
 						 return;
 
 					_NoteContent = value;
+					ContentLength.Length = _NoteContent.Length;
 					OnPropertyChanged(nameof(NoteContent));
 
 			   }
 		  }
+
+		  //private int _ContentLength;
+
+		  //public int ContentLength
+		  //{
+			 //  get { return _ContentLength; }
+			 //  set
+			 //  {
+
+				//	if (_ContentLength == value)
+				//		 return;
+
+				//	_ContentLength = value;
+				//	OnPropertyChanged(nameof(ContentLength));
+				//	Debug.WriteLine(ContentLength);
+			 //  }
+
+		  //}
+
+		  private ContentLength _ContentLength = new ContentLength();
+
+		  public ContentLength ContentLength
+		  {
+			   get { return _ContentLength; }
+			   set { _ContentLength = value; }
+		  }
+
+		  private SpeechRecognitionEngine _Recognizer { get; set; }
 
 
 		  public ICommand NewNotebookCommand { get; set; }
@@ -73,7 +130,8 @@ namespace NotesApp.ViewModel
 		  public ICommand NoteEndEditCommand { get; set; }
 
 		  public ICommand NewNoteCommand { get; set; }
-		  public ICommand TextChangedCommand { get; set; }
+		  public ICommand SpeechCommand { get; set; }
+
 
 
 		  public NotesVM()
@@ -89,21 +147,49 @@ namespace NotesApp.ViewModel
 
 			   NewNoteCommand = new RelayParameterizedCommand<Notebook>(NewNote);
 
-			   TextChangedCommand = new RelayCommand(RichTextChanged);
+			   SpeechCommand = new RelayParameterizedCommand<bool>(Speech);
 
 			   ReadNotebooks();
 			   ReadNotes();
 
+
+			   var currentCulture = (from r in SpeechRecognitionEngine.InstalledRecognizers()
+									 where r.Culture.Equals(Thread.CurrentThread.CurrentUICulture)
+									 select r).FirstOrDefault();
+
+			   // Replace that with Microsoft Speech API
+			   _Recognizer = new SpeechRecognitionEngine(currentCulture);
+
+			   GrammarBuilder builder = new GrammarBuilder();
+			   builder.AppendDictation();
+			   Grammar grammaer = new Grammar(builder);
+
+			   _Recognizer.LoadGrammar(grammaer);
+			   _Recognizer.SetInputToDefaultAudioDevice();
+			   _Recognizer.SpeechRecognized += Recognizer_SpeechRecognized;
+
 		  }
 
-		  private void RichTextChanged()
+		  private void Speech(bool IsChecked)
 		  {
-			   
+			   if (IsChecked)
+			   {
+					_Recognizer.RecognizeAsync(RecognizeMode.Multiple);
+			   }
+			   else
+			   {
+					_Recognizer.RecognizeAsyncStop();
+			   }
+		  }
+
+		  private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+		  {
+			   NoteContent += $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{e.Result.Text}";
 		  }
 
 		  private void NoteEndEdit(Note note)
 		  {
-			   if(note != null)
+			   if (note != null)
 			   {
 					note.IsEditing = false;
 					DatabaseHelper.Update(note);
@@ -112,11 +198,11 @@ namespace NotesApp.ViewModel
 
 		  private void NoteBeginEdit(Note note)
 		  {
-			   if(note != null)
+			   if (note != null)
 			   {
 					note.IsEditing = true;
 			   }
-					
+
 		  }
 
 		  private void ReadNotes()
@@ -157,7 +243,7 @@ namespace NotesApp.ViewModel
 
 		  private void NotebookEndEdit(Notebook notebook)
 		  {
-			   if(notebook != null)
+			   if (notebook != null)
 			   {
 					notebook.IsEditing = false;
 					DatabaseHelper.Update(notebook);
@@ -184,7 +270,7 @@ namespace NotesApp.ViewModel
 			   {
 					var notebooks = conn.Table<Notebook>().ToList();
 
-					foreach(var notebook in notebooks)
+					foreach (var notebook in notebooks)
 					{
 						 if (notebook.UserId == App.UserId)
 						 {
