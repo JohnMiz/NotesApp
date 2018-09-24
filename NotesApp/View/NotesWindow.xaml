@@ -130,21 +130,23 @@
                               />
                     <Button Content="Save"
                             x:Name="saveFile"
+                            Command="{Binding SaveNoteCommand}" VerticalAlignment="Bottom"
+                            Click="saveFile_Click"
                             />
                </ToolBar>
           </ToolBarTray>
           <Grid>
-               <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="29*"/>
-                    <ColumnDefinition Width="333*"/>
-               </Grid.ColumnDefinitions>
-               <toolkit:RichTextBox 
-                    Text="{Binding NoteContent, Source={StaticResource vm}, UpdateSourceTrigger=PropertyChanged}"
+
+               <RichTextBox 
                     Name="contentRichTextBox" Grid.ColumnSpan="2"
-                    SelectionChanged="contentRichTextBox_SelectionChanged">
+                    SelectionChanged="contentRichTextBox_SelectionChanged"
+                    Visibility="Visible">
+                         
+               </RichTextBox>
 
+               <!--Text="{Binding NoteContent, Source={StaticResource vm}}"-->
 
-               </toolkit:RichTextBox>
+               <!--Text="{Binding NoteContent, Source={StaticResource vm}, UpdateSourceTrigger=PropertyChanged}"-->
           </Grid>
      </DockPanel>
 </Window>

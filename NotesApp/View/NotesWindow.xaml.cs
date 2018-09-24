@@ -108,6 +108,28 @@ namespace NotesApp.View
 			   }
 		  }
 
+		  private void saveFile_Click(object sender, RoutedEventArgs e)
+		  {
+			   var notesVM = DataContext as NotesVM;
+			   if (notesVM.SelectedNote != null)
+			   {
+
+					string rtfFile = System.IO.Path.Combine(Environment.CurrentDirectory, $"{notesVM.SelectedNote.Id}.rtf");
+
+
+					using (FileStream fileStream = new FileStream(rtfFile, FileMode.Create))
+					{
+						 var TextRange = new TextRange(contentRichTextBox.Document.ContentStart, contentRichTextBox.Document.ContentEnd);
+						 TextRange.Save(fileStream, DataFormats.Rtf);
+					}
+			   }
+			   else
+			   {
+					MessageBox.Show("Choose note to save to...");
+			   }
+
+		  }
+
 
 
 		  //private void RichTextBox_TextChanged(object sender, TextChangedEventArgs e)

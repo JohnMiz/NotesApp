@@ -5,11 +5,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Speech.Recognition;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace NotesApp.ViewModel
@@ -77,22 +79,22 @@ namespace NotesApp.ViewModel
 			   }
 		  }
 
-		  private string _NoteContent;
+		  //private string _NoteContent;
 
-		  public string NoteContent
-		  {
-			   get { return _NoteContent; }
-			   set
-			   {
-					if (_NoteContent == value)
-						 return;
+		  //public string NoteContent
+		  //{
+			 //  get { return _NoteContent; }
+			 //  set
+			 //  {
+				//	if (_NoteContent == value)
+				//		 return;
 
-					_NoteContent = value;
-					ContentLength.Length = _NoteContent.Length;
-					OnPropertyChanged(nameof(NoteContent));
+				//	_NoteContent = value;
+				//	ContentLength.Length = _NoteContent.Length;
+				//	OnPropertyChanged(nameof(NoteContent));
 
-			   }
-		  }
+			 //  }
+		  //}
 
 		  //private int _ContentLength;
 
@@ -133,7 +135,6 @@ namespace NotesApp.ViewModel
 		  public ICommand SpeechCommand { get; set; }
 
 
-
 		  public NotesVM()
 		  {
 			   Notebooks = new ObservableCollection<Notebook>();
@@ -157,7 +158,7 @@ namespace NotesApp.ViewModel
 									 where r.Culture.Equals(Thread.CurrentThread.CurrentUICulture)
 									 select r).FirstOrDefault();
 
-			   // Replace that with Microsoft Speech API
+			   // TODO: Replace that with Microsoft Speech API
 			   _Recognizer = new SpeechRecognitionEngine(currentCulture);
 
 			   GrammarBuilder builder = new GrammarBuilder();
@@ -184,7 +185,7 @@ namespace NotesApp.ViewModel
 
 		  private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
 		  {
-			   NoteContent += $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{e.Result.Text}";
+			   //NoteContent += $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{e.Result.Text}";
 		  }
 
 		  private void NoteEndEdit(Note note)
