@@ -16,29 +16,6 @@ using System.Windows.Input;
 
 namespace NotesApp.ViewModel
 {
-	 public class ContentLength : ObservablePropertyNotifier
-	 {
-		  private int _Length;
-
-		  public int Length
-		  {
-			   get { return _Length; }
-			   set
-			   {
-
-					if (_Length == value)
-						 return;
-
-					_Length = value;
-					OnPropertyChanged(nameof(Length));
-			   }
-		  }
-
-		  public override string ToString()
-		  {
-			   return $"Document length: {Length - 2} characters";
-		  }
-	 }
 
 	 public class NotesVM : ObservablePropertyNotifier
 	 {
@@ -74,52 +51,9 @@ namespace NotesApp.ViewModel
 						 return;
 
 					_SelectedNote = value;
-
+					SelectedNoteChanged(this, new EventArgs());
 					OnPropertyChanged(nameof(SelectedNote));
 			   }
-		  }
-
-		  //private string _NoteContent;
-
-		  //public string NoteContent
-		  //{
-			 //  get { return _NoteContent; }
-			 //  set
-			 //  {
-				//	if (_NoteContent == value)
-				//		 return;
-
-				//	_NoteContent = value;
-				//	ContentLength.Length = _NoteContent.Length;
-				//	OnPropertyChanged(nameof(NoteContent));
-
-			 //  }
-		  //}
-
-		  //private int _ContentLength;
-
-		  //public int ContentLength
-		  //{
-			 //  get { return _ContentLength; }
-			 //  set
-			 //  {
-
-				//	if (_ContentLength == value)
-				//		 return;
-
-				//	_ContentLength = value;
-				//	OnPropertyChanged(nameof(ContentLength));
-				//	Debug.WriteLine(ContentLength);
-			 //  }
-
-		  //}
-
-		  private ContentLength _ContentLength = new ContentLength();
-
-		  public ContentLength ContentLength
-		  {
-			   get { return _ContentLength; }
-			   set { _ContentLength = value; }
 		  }
 
 		  private SpeechRecognitionEngine _Recognizer { get; set; }
@@ -134,6 +68,7 @@ namespace NotesApp.ViewModel
 		  public ICommand NewNoteCommand { get; set; }
 		  public ICommand SpeechCommand { get; set; }
 
+		  public event EventHandler SelectedNoteChanged;
 
 		  public NotesVM()
 		  {
@@ -290,6 +225,11 @@ namespace NotesApp.ViewModel
 			   };
 
 			   return notebook;
+		  }
+
+		  public void UpdateSelectedNote()
+		  {
+			   DatabaseHelper.Update(SelectedNote);
 		  }
 	 }
 }

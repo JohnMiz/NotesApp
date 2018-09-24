@@ -33,7 +33,7 @@
           </Menu>
           <StatusBar DockPanel.Dock="Bottom">
                <StatusBarItem>
-                    <TextBlock Text="{Binding ContentLength}"  />
+                    <TextBlock x:Name="statusTextBlock"  />
                </StatusBarItem>
           </StatusBar>
 
