@@ -107,8 +107,7 @@
           <ToolBarTray DockPanel.Dock="Top">
                <ToolBar>
                     <ToggleButton Content="Speech" Name="speechButton"
-                                  Command="{Binding SpeechCommand, Source={StaticResource vm}}"
-                                  CommandParameter="{Binding IsChecked, RelativeSource={RelativeSource Self}}"/>
+                                  Click="speechButton_Click"/>
                     <ToggleButton Name="boldButton" Click="boldButton_Click">
                          <TextBlock Text="B" FontWeight="Bold" />
                     </ToggleButton>
@@ -140,7 +139,8 @@
                <RichTextBox 
                     Name="contentRichTextBox" Grid.ColumnSpan="2"
                     SelectionChanged="contentRichTextBox_SelectionChanged"
-                    Visibility="Visible">
+                    Visibility="Visible"
+                    TextChanged="contentRichTextBox_TextChanged">
                          
                </RichTextBox>
 

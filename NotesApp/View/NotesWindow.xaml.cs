@@ -27,6 +27,7 @@ namespace NotesApp.View
 	 public partial class NotesWindow : Window
 	 {
 		  private NotesVM _NotesVM;
+		  private SpeechRecognitionEngine _Recognizer { get; set; }
 
 		  public NotesWindow()
 		  {
@@ -40,6 +41,41 @@ namespace NotesApp.View
 
 			   var fontSizes = new List<double>{ 10, 12, 14, 18, 24, 30, 36, 48, 60, 72, 96 };
 			   fontSizeComboBox.ItemsSource = fontSizes;
+
+			   // Speech recognition
+
+			   var currentCulture = (from r in SpeechRecognitionEngine.InstalledRecognizers()
+									 where r.Culture.Equals(Thread.CurrentThread.CurrentUICulture)
+									 select r).FirstOrDefault();
+
+			   // TODO: Replace that with Microsoft Speech API
+			   _Recognizer = new SpeechRecognitionEngine(currentCulture);
+
+			   GrammarBuilder builder = new GrammarBuilder();
+			   builder.AppendDictation();
+			   Grammar grammaer = new Grammar(builder);
+
+			   _Recognizer.LoadGrammar(grammaer);
+			   _Recognizer.SetInputToDefaultAudioDevice();
+			   _Recognizer.SpeechRecognized += Recognizer_SpeechRecognized;
+		  }
+
+		  private void speechButton_Click(object sender, RoutedEventArgs e)
+		  {
+			   var IsChecked = (sender as ToggleButton).IsChecked ?? false;
+			   if (IsChecked)
+			   {
+					_Recognizer.RecognizeAsync(RecognizeMode.Multiple);
+			   }
+			   else
+			   {
+					_Recognizer.RecognizeAsyncStop();
+			   }
+		  }
+
+		  private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+		  {
+			   contentRichTextBox.Document.Blocks.Add(new Paragraph(new Run(e.Result.Text)));
 		  }
 
 		  private void _NotesVM_SelectedNoteChanged(object sender, EventArgs e)
@@ -49,10 +85,6 @@ namespace NotesApp.View
 			   {
 					using (FileStream fileStream = new FileStream(_NotesVM.SelectedNote.FileLocation, FileMode.Open))
 					{
-						 //var length = (int)fileStream.Length;
-						 //byte[] buffer = new byte[length];
-						 //fileStream.Read(buffer, 0, length);
-
 						 var textRange = new TextRange(contentRichTextBox.Document.ContentStart, contentRichTextBox.Document.ContentEnd);
 
 						 textRange.Load(fileStream, DataFormats.Rtf);
@@ -151,6 +183,8 @@ namespace NotesApp.View
 					notesVM.SelectedNote.UpdatedTime = DateTime.Now;
 
 					notesVM.UpdateSelectedNote();
+
+					MessageBox.Show("The note was successfully saved!");
 			   }
 			   else
 			   {
@@ -159,11 +193,13 @@ namespace NotesApp.View
 
 		  }
 
-		  private void RichTextBox_TextChanged(object sender, TextChangedEventArgs e)
+		  private void contentRichTextBox_TextChanged(object sender, TextChangedEventArgs e)
 		  {
 			   var TextRange = new TextRange(contentRichTextBox.Document.ContentStart, contentRichTextBox.Document.ContentEnd);
 
 			   statusTextBlock.Text = $"Document length: {TextRange.Text.Length - 2} characters";
 		  }
+
+
 	 }
 }

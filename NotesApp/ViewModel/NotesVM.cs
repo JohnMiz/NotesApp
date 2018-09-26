@@ -56,9 +56,6 @@ namespace NotesApp.ViewModel
 			   }
 		  }
 
-		  private SpeechRecognitionEngine _Recognizer { get; set; }
-
-
 		  public ICommand NewNotebookCommand { get; set; }
 		  public ICommand NotebookBeginEditCommand { get; set; }
 		  public ICommand NotebookEndEditCommand { get; set; }
@@ -83,44 +80,12 @@ namespace NotesApp.ViewModel
 
 			   NewNoteCommand = new RelayParameterizedCommand<Notebook>(NewNote);
 
-			   SpeechCommand = new RelayParameterizedCommand<bool>(Speech);
-
 			   ReadNotebooks();
 			   ReadNotes();
 
 
-			   var currentCulture = (from r in SpeechRecognitionEngine.InstalledRecognizers()
-									 where r.Culture.Equals(Thread.CurrentThread.CurrentUICulture)
-									 select r).FirstOrDefault();
 
-			   // TODO: Replace that with Microsoft Speech API
-			   _Recognizer = new SpeechRecognitionEngine(currentCulture);
 
-			   GrammarBuilder builder = new GrammarBuilder();
-			   builder.AppendDictation();
-			   Grammar grammaer = new Grammar(builder);
-
-			   _Recognizer.LoadGrammar(grammaer);
-			   _Recognizer.SetInputToDefaultAudioDevice();
-			   _Recognizer.SpeechRecognized += Recognizer_SpeechRecognized;
-
-		  }
-
-		  private void Speech(bool IsChecked)
-		  {
-			   if (IsChecked)
-			   {
-					_Recognizer.RecognizeAsync(RecognizeMode.Multiple);
-			   }
-			   else
-			   {
-					_Recognizer.RecognizeAsyncStop();
-			   }
-		  }
-
-		  private void Recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
-		  {
-			   //NoteContent += $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{e.Result.Text}";
 		  }
 
 		  private void NoteEndEdit(Note note)
