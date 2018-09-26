@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,15 +17,19 @@ namespace NotesApp
 	 public partial class App : Application
 	 {
 
-		  public static int UserId;
+		  public static int UserId = -1;
 		  //public static MobileServiceClient MobileServiceClient = new MobileServiceClient("YOUR AZURE SERVER HERE");
 
 		  protected override void OnStartup(StartupEventArgs e)
 		  {
 			   base.OnStartup(e);
 
-			   LoginWindow loginWindow = new LoginWindow();
-			   loginWindow.Show();
+			   while (UserId == -1)
+			   {
+
+					new LoginWindow().ShowDialog();
+					Debug.WriteLine("!23");
+			   }
 		  }
 	 }
 }

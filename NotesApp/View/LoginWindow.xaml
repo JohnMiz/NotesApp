@@ -8,6 +8,7 @@
         xmlns:con="clr-namespace:NotesApp.ViewModel.Converters"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
         Title="Login" Height="400" Width="400">
 
      <Window.Resources>

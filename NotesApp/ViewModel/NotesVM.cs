@@ -82,10 +82,6 @@ namespace NotesApp.ViewModel
 
 			   ReadNotebooks();
 			   ReadNotes();
-
-
-
-
 		  }
 
 		  private void NoteEndEdit(Note note)
@@ -103,7 +99,6 @@ namespace NotesApp.ViewModel
 			   {
 					note.IsEditing = true;
 			   }
-
 		  }
 
 		  private void ReadNotes()
