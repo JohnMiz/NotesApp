@@ -33,7 +33,9 @@ namespace NotesApp.View
 		  {
 			   InitializeComponent();
 
-			   _NotesVM = this.DataContext as NotesVM;
+			   _NotesVM = new NotesVM();
+			   this.DataContext = _NotesVM;
+
 			   _NotesVM.SelectedNoteChanged += _NotesVM_SelectedNoteChanged;
 
 			   var fonts = Fonts.SystemFontFamilies.OrderBy(f => f.Source);

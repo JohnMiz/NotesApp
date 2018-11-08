@@ -17,14 +17,18 @@
      </Window.Resources>
 
      <Grid>
-          <StackPanel Margin="20 0"
+          <Grid.ColumnDefinitions>
+               <ColumnDefinition Width="135*"/>
+               <ColumnDefinition Width="62*"/>
+          </Grid.ColumnDefinitions>
+          <StackPanel Margin="20,88"
                       VerticalAlignment="Center"
-                      Visibility="{Binding IsLoginMode, Converter={StaticResource BoolToVisConverter }}">
+                      Visibility="{Binding IsLoginMode, Converter={StaticResource BoolToVisConverter }}" Grid.ColumnSpan="2">
                <TextBlock FontSize="20"
                           Text="Notes App"
                           HorizontalAlignment="Center"
                           Margin="0 0 0 30"/>
-               
+
                <TextBlock Text="Username:" />
                <TextBox Text="{Binding User.Username, Mode=TwoWay}"/>
                <TextBlock Text="Password:" />
@@ -43,10 +47,10 @@
                        HorizontalAlignment="Right"
                         />
           </StackPanel>
-          
-          <StackPanel x:Name="registerStackPanel" Margin="20 0"
+
+          <StackPanel x:Name="registerStackPanel" Margin="20,54"
                       VerticalAlignment="Center"
-                      Visibility="{Binding IsLoginMode, Converter={con:InverseBoolToVisConverter}}">
+                      Visibility="{Binding IsLoginMode, Converter={con:InverseBoolToVisConverter}}" Grid.ColumnSpan="2">
                <TextBlock Text="Username:" />
                <TextBox Text="{Binding User.Username, Mode=TwoWay}"/>
                <TextBlock Text="Name:" />

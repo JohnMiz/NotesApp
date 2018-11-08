@@ -18,9 +18,9 @@
           <con:BoolToVisConverter  x:Key="BoolToVisConverter"/>
      </Window.Resources>
 
-     <Window.DataContext>
+     <!--<Window.DataContext>
           <vm:NotesVM />
-     </Window.DataContext>
+     </Window.DataContext>-->
 
      <DockPanel x:Name="container">
           <Menu DockPanel.Dock="Top">
@@ -40,12 +40,14 @@
           <!-- Notebooks -->
           <ListView Width="140" DockPanel.Dock="Left"
                     ItemsSource="{Binding Notebooks}"
-                    SelectedItem="{Binding SelectedNotebook, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    Background="MidnightBlue">
+                    SelectedItem="{Binding SelectedNotebook, Mode=TwoWay}"
+                    Background="MidnightBlue"
+                    x:Name="RootListView">
                <ListView.ItemTemplate>
                     <DataTemplate>
                          <Grid>
-                              <uc:Notebook />
+
+                              <uc:Notebook Background="Transparent"/>
                               <TextBox Text="{Binding Name, Mode=TwoWay}"
                                        Visibility="{Binding IsEditing, Converter={StaticResource BoolToVisConverter}}"
                                        >
@@ -61,11 +63,11 @@
                               <Grid.ContextMenu>
                                    <ContextMenu>
                                         <MenuItem Header="Rename"
-                                                  Command="{Binding NotebookBeginEditCommand, Source={StaticResource vm}}"
+                                                  Command="{Binding DataContext.NotebookBeginEditCommand, ElementName=RootListView}"
                                                   CommandParameter="{Binding}"/>
                                         <MenuItem Header="Delete"
                                                   Command="{Binding DeleteNotebookCommand, Source={StaticResource vm}}"
-                                                  CommandParameter="{Binding SelectedNotebook, Source={StaticResource vm}}"/>
+                                                  CommandParameter="{Binding}"/>
                                    </ContextMenu>
                               </Grid.ContextMenu>
                          </Grid>
@@ -80,7 +82,7 @@
                <ListView.ItemTemplate>
                     <DataTemplate>
                          <Grid>
-                              <uc:NoteControl />
+                              <uc:NoteControl Background="Transparent" />
                               <TextBox Text="{Binding Title, Mode=TwoWay}"
                                        Visibility="{Binding IsEditing, Converter={con:BoolToVisConverter}}"
                                        >
@@ -129,7 +131,7 @@
                               />
                     <Button Content="Save"
                             x:Name="saveFile"
-                            Command="{Binding SaveNoteCommand}" VerticalAlignment="Bottom"
+                            VerticalAlignment="Bottom"
                             Click="saveFile_Click"
                             />
                </ToolBar>

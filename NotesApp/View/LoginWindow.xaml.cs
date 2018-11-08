@@ -1,18 +1,6 @@
 ﻿using NotesApp.Services;
 using NotesApp.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace NotesApp.View
 {
@@ -24,7 +12,7 @@ namespace NotesApp.View
 		  public LoginWindow()
 		  {
 			   InitializeComponent();
-			   DataContext = new LoginVM(this, new SqliteLoginService()); // TODO: Inject SqliteLoginService
+			   DataContext = new LoginVM(this, new AzureLoginService()); // TODO: Inject SqliteLoginService
 		  }
 
 	 }

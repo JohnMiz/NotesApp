@@ -1,69 +1,56 @@
 ﻿using NotesApp.Model;
 using NotesApp.ViewModel.Commands;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Speech.Recognition;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace NotesApp.ViewModel
 {
 
-	 public class NotesVM : ObservablePropertyNotifier
+	 public class NotesVM : ViewModelBase
 	 {
-		  public ObservableCollection<Notebook> Notebooks { get; set; }
-
-		  public ObservableCollection<Note> Notes { get; set; }
-
 		  private Notebook _SelectedNotebook;
+		  private Note _SelectedNote;
+
+
+		  public ObservableCollection<Notebook> Notebooks { get; set; }
+		  public ObservableCollection<Note> Notes { get; set; }
 
 		  public Notebook SelectedNotebook
 		  {
 			   get { return _SelectedNotebook; }
 			   set
 			   {
-					if (_SelectedNotebook == value)
-						 return;
-
-					_SelectedNotebook = value;
-					ReadNotes();
-
-					OnPropertyChanged(nameof(SelectedNotebook));
+					if(SetProperty(ref _SelectedNotebook, value))
+					{
+						 ReadNotes();
+					}
 			   }
 		  }
-
-		  private Note _SelectedNote;
 
 		  public Note SelectedNote
 		  {
 			   get { return _SelectedNote; }
 			   set
 			   {
-					if (_SelectedNote == value)
-						 return;
-
-					_SelectedNote = value;
-					SelectedNoteChanged(this, new EventArgs());
-					OnPropertyChanged(nameof(SelectedNote));
+					if (SetProperty(ref _SelectedNote, value))
+					{
+						 SelectedNoteChanged(this, new EventArgs());
+					}
 			   }
 		  }
 
-		  public ICommand NewNotebookCommand { get; set; }
-		  public ICommand NotebookBeginEditCommand { get; set; }
-		  public ICommand NotebookEndEditCommand { get; set; }
-		  public ICommand NoteBeginEditCommand { get; set; }
-		  public ICommand NoteEndEditCommand { get; set; }
+		  public ICommand NewNotebookCommand { get; private set; }
+		  public ICommand NotebookBeginEditCommand { get; private set; }
+		  public ICommand NotebookEndEditCommand { get; private set; }
+		  public ICommand DeleteNotebookCommand { get; private set; }
 
-		  public ICommand NewNoteCommand { get; set; }
-		  public ICommand SpeechCommand { get; set; }
+		  public ICommand NewNoteCommand { get; private set; }
+		  public ICommand NoteBeginEditCommand { get; private set; }
+		  public ICommand NoteEndEditCommand { get; private set; }
+		  
 
 		  public event EventHandler SelectedNoteChanged;
 
@@ -75,8 +62,11 @@ namespace NotesApp.ViewModel
 			   NewNotebookCommand = new RelayCommand(NewNotebook);
 			   NotebookBeginEditCommand = new RelayParameterizedCommand<Notebook>(NotebookBeginEdit);
 			   NotebookEndEditCommand = new RelayParameterizedCommand<Notebook>(NotebookEndEdit);
+
 			   NoteBeginEditCommand = new RelayParameterizedCommand<Note>(NoteBeginEdit);
 			   NoteEndEditCommand = new RelayParameterizedCommand<Note>(NoteEndEdit);
+
+			   DeleteNotebookCommand = new RelayParameterizedCommand<Notebook>(DeleteNotebook);
 
 			   NewNoteCommand = new RelayParameterizedCommand<Notebook>(NewNote);
 
@@ -84,12 +74,86 @@ namespace NotesApp.ViewModel
 			   ReadNotes();
 		  }
 
-		  private void NoteEndEdit(Note note)
+		  private async void NewNotebook()
 		  {
-			   if (note != null)
+			   await App.MobileServiceClient.GetTable<Notebook>().InsertAsync(CreateNewNotebook());
+
+			   Notebooks.Clear();
+
+			   ReadNotebooks();
+		  }
+
+		  private void NotebookBeginEdit(Notebook notebook)
+		  {
+			   notebook.IsEditing = true;
+		  }
+
+		  private async void NotebookEndEdit(Notebook notebook)
+		  {
+			   if (notebook != null)
 			   {
-					note.IsEditing = false;
-					DatabaseHelper.Update(note);
+					notebook.IsEditing = false;
+					await App.MobileServiceClient.GetTable<Notebook>().UpdateAsync(notebook);
+			   }
+		  }
+
+		  private async void DeleteNotebook(Notebook notebook)
+		  {
+			   // Delete each note from the datebase
+
+			   foreach(var note in Notes)
+			   {
+					if(note.NotebookId == notebook.Id)
+					{
+						 try
+						 {
+							  await App.MobileServiceClient.GetTable<Note>().DeleteAsync(note);
+						 }
+						 catch (Exception ex)
+						 {
+							  Debug.WriteLine(ex.Message);
+						 }
+						 
+					}
+			   }
+
+			   // Delete the notebook
+			   try
+			   {
+					await App.MobileServiceClient.GetTable<Notebook>().DeleteAsync(notebook);
+			   }
+			   catch (Exception ex)
+			   {
+					Debug.WriteLine(ex.Message);
+			   }
+
+			   ReadNotebooks();
+			   ReadNotes();
+		  }
+
+		  private async void NewNote(Notebook notebook)
+		  {
+			   if (notebook != null)
+			   {
+					Note newNote = new Note
+					{
+						 NotebookId = notebook.Id,
+						 CreatedTime = DateTime.Now,
+						 UpdatedTime = DateTime.Now,
+						 Title = "New Note",
+
+					};
+
+					try
+					{
+						 await App.MobileServiceClient.GetTable<Note>().InsertAsync(newNote);
+					}
+					catch (Exception ex)
+					{
+						 Debug.WriteLine(ex.Message);
+					}
+
+					ReadNotes();
 			   }
 		  }
 
@@ -101,82 +165,23 @@ namespace NotesApp.ViewModel
 			   }
 		  }
 
-		  private void ReadNotes()
+		  private async void NoteEndEdit(Note note)
 		  {
-			   using (SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(DatabaseHelper.dbFile))
+			   if (note != null)
 			   {
-					conn.CreateTable<Note>();
-
-					if (SelectedNotebook != null)
+					note.IsEditing = false;
+					try
 					{
-						 Notes.Clear();
-
-						 var notes = conn.Table<Note>().Where(n => n.NotebookId == SelectedNotebook.Id).ToList();
-
-						 foreach (var note in notes)
-						 {
-							  Notes.Add(note);
-						 }
+						 await App.MobileServiceClient.GetTable<Note>().UpdateAsync(note);
+					}
+					catch(Exception ex)
+					{
+						 Debug.WriteLine(ex.Message);
 					}
 			   }
 		  }
 
-		  private void NewNote(Notebook notebook)
-		  {
-			   Note newNote = new Note
-			   {
-					NotebookId = notebook.Id,
-					CreatedTime = DateTime.Now,
-					UpdatedTime = DateTime.Now,
-					Title = "New Note",
-
-			   };
-
-			   DatabaseHelper.Insert(newNote);
-
-			   ReadNotes();
-		  }
-
-		  private void NotebookEndEdit(Notebook notebook)
-		  {
-			   if (notebook != null)
-			   {
-					notebook.IsEditing = false;
-					DatabaseHelper.Update(notebook);
-			   }
-		  }
-
-		  private void NotebookBeginEdit(Notebook notebook)
-		  {
-			   notebook.IsEditing = true;
-		  }
-
-		  private void NewNotebook()
-		  {
-			   DatabaseHelper.Insert(CreateNewNotebook());
-
-			   Notebooks.Clear();
-
-			   ReadNotebooks();
-		  }
-
-		  private void ReadNotebooks()
-		  {
-			   using (SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(DatabaseHelper.dbFile))
-			   {
-					var notebooks = conn.Table<Notebook>().ToList();
-
-					foreach (var notebook in notebooks)
-					{
-						 if (notebook.UserId == App.UserId)
-						 {
-							  Notebooks.Add(notebook);
-						 }
-					}
-			   }
-		  }
-
-		  Notebook CreateNewNotebook()
+		  private Notebook CreateNewNotebook()
 		  {
 			   Notebook notebook = new Notebook
 			   {
@@ -187,9 +192,49 @@ namespace NotesApp.ViewModel
 			   return notebook;
 		  }
 
-		  public void UpdateSelectedNote()
+		  private async void ReadNotes()
 		  {
-			   DatabaseHelper.Update(SelectedNote);
+			   try
+			   {
+					var notes = (await App.MobileServiceClient.GetTable<Note>().ToListAsync()).Where(n => n.NotebookId == SelectedNotebook.Id);
+
+					Notes.Clear();
+
+					foreach(var note in notes)
+					{
+						 Notes.Add(note);
+					}
+			   }
+			   catch (Exception ex)
+			   {
+					Debug.WriteLine(ex.Message);
+			   }
+
+		  }
+		  
+		  private async void ReadNotebooks()
+		  {
+			   // NOTE: Bad handling of try catch
+			   try
+			   {
+					var notebooks = await App.MobileServiceClient.GetTable<Notebook>().Where(n => n.UserId == App.UserId).ToListAsync();
+
+					Notebooks.Clear();
+
+					foreach (var notebook in notebooks)
+					{
+						 Notebooks.Add(notebook);
+					}
+			   }
+			   catch (Exception ex)
+			   {
+					Debug.WriteLine(ex.Message);
+			   }
+		  }
+
+		  public async void UpdateSelectedNote()
+		  {
+			   await App.MobileServiceClient.GetTable<Note>().UpdateAsync(SelectedNote);
 		  }
 	 }
 }

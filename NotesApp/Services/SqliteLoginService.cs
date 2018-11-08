@@ -10,9 +10,9 @@ namespace NotesApp.Services
 {
 	 public class SqliteLoginService : ILoginService
 	 {
-		  public User GetUserFromDB(string username)
+		  private User _GetUserFromDB(string username)
 		  {
-			   using (SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(DatabaseHelper.dbFile))
+			   using (SQLite.SQLiteConnection conn = new SQLite.SQLiteConnection(SqliteDatabaseHelper.dbFile))
 			   {
 					conn.CreateTable<User>();
 
@@ -22,13 +22,18 @@ namespace NotesApp.Services
 
 					if (dbUser != null)
 					{
-						 if (username == dbUser.Username)
-							  return dbUser;
+						 return dbUser;
 					}
 
 			   }
 
 			   return null;
+		  }
+
+		  public async Task<User> GetUserFromDB(string username)
+		  {
+			   var user = await Task.Run(() => { return _GetUserFromDB(username); });
+			   return user;
 		  }
 
 		  public void Login()

@@ -4,44 +4,28 @@ using System.Runtime.CompilerServices;
 
 namespace NotesApp.ViewModel
 {
-	 public class ObservablePropertyNotifier : INotifyPropertyChanged
+	 public class ViewModelBase : INotifyPropertyChanged
 	 {
 		  public event PropertyChangedEventHandler PropertyChanged;
 
-		  public void OnPropertyChanged(string propertyName)
+		  public bool SetProperty<T>(ref T dest, T value, [CallerMemberName]string propertyName = null)
 		  {
-			   if (PropertyChanged != null)
-					PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-		  }
-	 }
-
-	 public class ViewModelBase
-	 {
-		  public ObservablePropertyNotifier notifier { get; set; }
-
-		  public ViewModelBase()
-		  {
-			   notifier = new ObservablePropertyNotifier();
-		  }
-	 }
-
-	 public class ObservableBase : INotifyPropertyChanged
-	 {
-		  public event PropertyChangedEventHandler PropertyChanged;
-
-		  protected void Set<T>(ref T storage, T value, [CallerMemberName]string propertyName = null)
-		  {
-			   if (Equals(storage, value))
+			   if(object.Equals(dest, value))
 			   {
-					return;
+					return false;
 			   }
 
-			   storage = value;
+			   dest = value;
 			   OnPropertyChanged(propertyName);
+			   return true;
 		  }
 
-		  protected void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		  private void OnPropertyChanged(string propertyName)
+		  {
+			   if(PropertyChanged != null)
+			   {
+					PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+			   }
+		  }
 	 }
-
-
 }

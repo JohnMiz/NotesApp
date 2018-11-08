@@ -16,19 +16,17 @@ namespace NotesApp
 	 /// </summary>
 	 public partial class App : Application
 	 {
-
-		  public static int UserId = -1;
-		  //public static MobileServiceClient MobileServiceClient = new MobileServiceClient("YOUR AZURE SERVER HERE");
+		  public static string UserId = "";
+		  public static string AZURE_SERVER_URL = "FILL_YOUR_AZURE_SERVER_URL";
+		  public static MobileServiceClient MobileServiceClient = new MobileServiceClient(AZURE_SERVER_URL);
 
 		  protected override void OnStartup(StartupEventArgs e)
 		  {
 			   base.OnStartup(e);
 
-			   while (UserId == -1)
+			   while (string.IsNullOrEmpty(UserId)) 
 			   {
-
 					new LoginWindow().ShowDialog();
-					Debug.WriteLine("!23");
 			   }
 		  }
 	 }

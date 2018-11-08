@@ -11,6 +11,6 @@ namespace NotesApp.Services
 	 {
 		  void Login();
 
-		  User GetUserFromDB(string username);
+		  Task<User> GetUserFromDB(string username);
 	 }
 }

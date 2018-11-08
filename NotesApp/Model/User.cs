@@ -11,10 +11,10 @@ namespace NotesApp.Model
 	 public class User : INotifyPropertyChanged
 	 {
 		  
-		  private int _Id;
+		  private string _Id;
 
 		  [PrimaryKey, AutoIncrement]
-		  public int Id
+		  public string Id
 		  {
 			   get { return _Id; }
 			   set

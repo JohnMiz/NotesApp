@@ -11,19 +11,19 @@ namespace NotesApp.Model
 {
 	 public class Notebook : INotifyPropertyChanged
 	 {
-		  private int _Id;
+		  private string _Id;
 
 		  [PrimaryKey, AutoIncrement]
-		  public int Id
+		  public string Id
 		  {
 			   get { return _Id; }
 			   set { _Id = value; OnPropertyChanged(nameof(Id)); }
 		  }
 
-		  private int _UserId;
+		  private string _UserId;
 
 		  [Indexed]
-		  public int UserId
+		  public string UserId
 		  {
 			   get { return _UserId; }
 			   set { _UserId = value; OnPropertyChanged(nameof(UserId)); }

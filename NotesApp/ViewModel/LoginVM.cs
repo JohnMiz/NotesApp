@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace NotesApp.ViewModel
 {
-	 public class LoginVM : ObservablePropertyNotifier
+	 public class LoginVM : ViewModelBase
 	 {
 		  private User _User;
 
@@ -30,7 +30,7 @@ namespace NotesApp.ViewModel
 		  public bool IsLoginMode
 		  {
 			   get { return _IsLoginMode; }
-			   set { if (_IsLoginMode == value) return; _IsLoginMode = value; OnPropertyChanged(nameof(IsLoginMode)); }
+			   set { SetProperty(ref _IsLoginMode, value); }
 		  }
 
 
@@ -61,33 +61,39 @@ namespace NotesApp.ViewModel
 
 		  #region Command Functions
 
-		  private void Login()
+		  private async void Login()
 		  {
 			   string message = string.Empty;
 			   if (_UserAuth.VerifyCredentials())
 			   {
-					User user = _LoginService.GetUserFromDB(User.Username);
-
-					// TODO: Add loading that will notify the user that the server is processing the data
-
-					if (user != null)
+					try
 					{
-						 if (_UserAuth.VerifyPassword(user.Password))
-						 {
-							  App.UserId = user.Id;
+						 User user = await _LoginService.GetUserFromDB(User.Username);
+						 // TODO: Add loading that will notify the user that the server is processing the data
 
-							  GoToNotesWindow();
-						   
-							  _Window.Close();
+						 if (user != null)
+						 {
+							  if (_UserAuth.VerifyPassword(user.Password))
+							  {
+								   App.UserId = user.Id;
+
+								   GoToNotesWindow();
+
+								   _Window.Close();
+							  }
+							  else
+							  {
+								   message = "Username or password not found!";
+							  }
 						 }
 						 else
 						 {
 							  message = "Username or password not found!";
 						 }
 					}
-					else
+					catch(Exception ex)
 					{
-						 message = "Username or password not found!";
+						 MessageBox.Show(ex.Message);
 					}
 
 			   }
@@ -100,18 +106,28 @@ namespace NotesApp.ViewModel
 					MessageBox.Show(message);
 		  }
 
-		  private void Register()
+		  private async void Register()
 		  {
 			   if(_UserAuth.VerifyRegisterInfo())
 			   {
-					var result = DatabaseHelper.Insert(User);
-
-					if(result)
+					try
 					{
+						 await App.MobileServiceClient.GetTable<User>().InsertAsync(User);
 						 App.UserId = User.Id;
 						 IsLoginMode = true;
+						 
+					}
+					catch(Exception ex)
+					{
+						 MessageBox.Show(ex.Message);
 					}
 			   }
+			   else
+			   {
+					MessageBox.Show("Fill all the fields.");
+			   }
+
+
 		  }
 
 		  private void NoAccount()
